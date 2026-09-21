@@ -1,6 +1,9 @@
 #Actionableitems , decision , questions 
+from dotenv import load_dotenv
+load_dotenv(override=True)
 
-from langchain_mistralai import ChatMistralAI
+import os
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
@@ -9,8 +12,10 @@ import time
 
 
 def get_llm():
-    return ChatMistralAI(model = "mistral-small-latest", mistral_api_key = os.getenv("MISTRAL_API_KEY"),temperature=0.2)
-
+    return ChatGoogleGenerativeAI(
+    model="gemini-3.6-flash",
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 
 
 def build_chain(system_prompt : str):

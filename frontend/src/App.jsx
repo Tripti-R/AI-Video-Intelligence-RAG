@@ -2,12 +2,12 @@ import { useState } from "react"
 
 function App() {
   const [source, setSource] = useState("")
-  const [language, setLanguage] = useState("english")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState("")
   const [question, setQuestion] = useState("")
   const [answer, setAnswer] = useState("")
+  const [sourceTimestamps, setSourceTimestamps] = useState([])
   const [asking, setAsking] = useState(false)
   
   /* first function*/
@@ -28,8 +28,8 @@ function App() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          source: source,
-          language: language,
+          source: source
+          
         }),
       })
 
@@ -76,7 +76,7 @@ function App() {
     }
 
     setAnswer(data.answer)
-
+    setSourceTimestamps(data.sources)
   } catch (err) {
     setAnswer(`Error: ${err.message}`)
   } finally {
@@ -125,14 +125,7 @@ function App() {
               className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400"
             />
 
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3"
-            >
-              <option value="english">English</option>
-              <option value="hinglish">Hinglish</option>
-            </select>
+            
 
             <button
               onClick={analyzeVideo}
@@ -205,9 +198,17 @@ function App() {
                 Transcript
               </h2>
 
-              <div className="mt-4 max-h-96 overflow-y-auto whitespace-pre-wrap rounded-xl bg-slate-950 p-5 text-sm leading-7 text-slate-300">
-                {result.transcript}
-             
+              <div className="mt-4 max-h-96 overflow-y-auto rounded-xl bg-slate-950 p-5 text-sm leading-7 text-slate-300">
+                {result.transcript.map((segment, index) => (
+                  <p key={index} className="mb-2">
+                    <span className="mr-3 font-semibold text-cyan-400">
+                      {Math.floor(segment.start / 60)}:
+                      {String(Math.floor(segment.start % 60)).padStart(2, "0")}
+                    </span>
+
+                    {segment.text}
+                  </p>
+                ))}
               </div>
 
 
@@ -251,18 +252,36 @@ function App() {
             </div>
 
             {answer && (
-              <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-5">
+                <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950 p-5">
 
-                <p className="text-sm font-semibold text-cyan-400">
-                  AI Assistant
-                </p>
+                  <p className="text-sm font-semibold text-cyan-400">
+                    AI Assistant
+                  </p>
 
-                <p className="mt-3 whitespace-pre-wrap leading-7 text-slate-300">
-                  {answer}
-                </p>
+                  <p className="mt-3 whitespace-pre-wrap leading-7 text-slate-300">
+                    {answer}
+                  </p>
 
-              </div>
-            )}
+                  {sourceTimestamps.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm font-semibold text-cyan-400">
+                        Sources
+                      </p>
+
+                      {sourceTimestamps.map((source, index) => (
+                        <p key={index} className="mt-1 text-sm text-slate-400">
+                          {Math.floor(source.start_time / 60)}:
+                          {String(Math.floor(source.start_time % 60)).padStart(2, "0")}
+                          {" - "}
+                          {Math.floor(source.end_time / 60)}:
+                          {String(Math.floor(source.end_time % 60)).padStart(2, "0")}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+
+                </div>
+              )}
 
           </section>
           </div>
